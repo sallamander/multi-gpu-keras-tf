@@ -1,0 +1,10 @@
+name: dist-keras
+channels: !!python/tuple
+- conda-forge
+- defaults
+dependencies:
+- conda-forge::ipython=5.0.0=py35_0
+- conda-forge::ipython_genutils=0.1.0=py35_0
+- conda-forge::pytest=3.0.5=py35_0
+- pip:
+  - keras==2.0.2
