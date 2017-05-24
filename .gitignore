@@ -1,1 +1,3 @@
 dist-keras-tf/dist_keras_tf.egg-info/*
+__pycache__
+.cache
