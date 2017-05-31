@@ -8,3 +8,4 @@ dependencies:
 - conda-forge::pytest=3.0.5=py35_0
 - pip:
   - keras==2.0.2
+  - h5py==2.7.0

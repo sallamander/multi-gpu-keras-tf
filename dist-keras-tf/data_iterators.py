@@ -4,6 +4,7 @@ import numpy as np
 import keras.datasets
 from keras.utils.np_utils import to_categorical
 
+
 class DataSetIterator():
     """Wrapper around keras.datasets to make them generators"""
 
@@ -37,11 +38,15 @@ class DataSetIterator():
 
         dataset = getattr(keras.datasets, self.name)
         train_data, test_data = dataset.load_data()
-        x_train, y_train = train_data[0], train_data[1]
-        x_test, y_test = test_data[0], test_data[1]
+        x_train, y_train = train_data[0] / 255., train_data[1]
+        x_test, y_test = test_data[0] / 255., test_data[1]
 
         y_train = to_categorical(y_train)
         y_test = to_categorical(y_test)
+
+        if self.name == 'mnist':
+            x_train = np.expand_dims(x_train, axis=-1)
+            x_test = np.expand_dims(x_test, axis=-1)
 
         if nb_obs:
             x_train = x_train[:nb_obs]
@@ -51,6 +56,20 @@ class DataSetIterator():
             y_test = y_test[:nb_obs]
 
         return x_train, y_train, x_test, y_test
+
+    @property
+    def input_shape(self):
+        """Return the shape of one observation from x_train/x_test"""
+
+        assert self.x_train[0].shape == self.x_test[0].shape
+        return self.x_train[0].shape
+
+    @property
+    def output_shape(self):
+        """Return the shape of one observation from y_train/y_test"""
+
+        assert self.y_train[0].shape == self.y_test[0].shape
+        return self.y_train[0].shape
 
     def get_train_iter(self, batch_size):
         """Return a generator that yields batches of training data indefinitely

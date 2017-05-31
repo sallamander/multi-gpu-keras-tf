@@ -11,6 +11,9 @@ from keras.layers import Conv2D, Dense, Flatten, Input, MaxPooling2D
 class VGG16():
     """VGG16 network
 
+    Note that the number of filters in each layer has been halved to make the
+    network small enough to fit on a GPU with 12G of memory.
+
     Code heavily taken from:
         https://github.com/fchollet/keras/blob/master/keras/applications/vgg16.py
     """
@@ -55,21 +58,21 @@ class VGG16():
         inputs = Input(shape=input_shape)
 
         layer = self._conv_block(
+            layer=inputs, num_conv_layers=2, num_filters=32
+        )
+        layer = self._conv_block(
             layer=inputs, num_conv_layers=2, num_filters=64
         )
         layer = self._conv_block(
-            layer=inputs, num_conv_layers=2, num_filters=128
+            layer=inputs, num_conv_layers=3, num_filters=128
         )
         layer = self._conv_block(
             layer=inputs, num_conv_layers=3, num_filters=256
         )
-        layer = self._conv_block(
-            layer=inputs, num_conv_layers=3, num_filters=512
-        )
 
         layer = Flatten()(layer)
-        layer = Dense(units=4096, activation='relu')(layer)
-        layer = Dense(units=4096, activation='relu')(layer)
+        layer = Dense(units=2048, activation='relu')(layer)
+        layer = Dense(units=2048, activation='relu')(layer)
         outputs = Dense(units=num_classes, activation='softmax')(layer)
 
         return inputs, outputs
