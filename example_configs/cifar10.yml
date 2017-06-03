@@ -1,0 +1,11 @@
+dataset:
+    name: cifar10
+compile_args:
+    optimizer: adam
+    loss: categorical_crossentropy
+    metrics:
+        - accuracy
+fit_args:
+    verbose: True
+    epochs: 20
+    batch_size: 32
