@@ -39,14 +39,18 @@ def parse_args():
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--output_dir', type=str,
-        help='Filepath to the directory to store model output in.'
-    )
-    parser.add_argument(
         '--config', type=str,
         help=('Filepath to a model training config (YML file). Must specify '
               'a loss via a \'compile_args\' section and a dataset name via a '
               '\'dataset\' section.')
+    )
+    parser.add_argument(
+        '--gpu_id', type=int,
+        help='GPU ID for the GPU to train the model on.'
+    )
+    parser.add_argument(
+        '--output_dir', type=str,
+        help='Filepath to the directory to store model output in.'
     )
 
     args = parser.parse_args()
@@ -76,7 +80,11 @@ def main():
     # it might be configurable via the config
     network = VGG16()
     trainer = KerasTrainer(output_dir=args.output_dir)
-    trainer.train(network, dataset_iterator, compile_args, fit_args)
+    trainer.train(
+        network, dataset_iterator,
+        compile_args, fit_args, 
+        args.gpu_id
+    )
 
 
 if __name__ == '__main__':

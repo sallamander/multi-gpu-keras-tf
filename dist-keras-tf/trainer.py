@@ -1,6 +1,7 @@
 """Model training class"""
 
 import os
+import tensorflow as tf
 from keras.models import Model
 
 
@@ -23,6 +24,16 @@ class KerasTrainer():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
+    @staticmethod
+    def _set_cuda_devices(gpu_id):
+        """Set CUDA related environment variables before running models
+
+        :param gpu_id: int holding a GPU ID
+        """
+
+        os.environ['CUDA_DEVICE_ORDER'] = 'PCI_BUS_ID'
+        os.environ['CUDA_VISIBLE_DEVICES'] = str(gpu_id)
+
     def _save_model(self, model):
         """Save the model to a YML and weights file
 
@@ -38,7 +49,8 @@ class KerasTrainer():
 
         model.save_weights(fpath_weights)
 
-    def train(self, network, dataset_iterator, compile_args, fit_args):
+    def train(self, network, dataset_iterator, compile_args, fit_args, 
+              gpu_id):
         """Train a model specified by network using data from dataset_iterator
 
 
@@ -49,13 +61,15 @@ class KerasTrainer():
          arguments to the compile method of a Keras model
         :param fit_args: dictionary of key/value pairs to pass as keyword
          arguments to the fit method of a Keras model
+        :param gpu_id: integer for the GPU to train the model on
         """
 
         input_shape = dataset_iterator.input_shape
         num_classes = dataset_iterator.output_shape[-1]
 
-        inputs, outputs = network.build(input_shape, num_classes)
-        model = Model(inputs=inputs, outputs=outputs)
+        self._set_cuda_devices(gpu_id)
+        with tf.device('/gpu:{}'.format(gpu_id)):
+            model = network.build(input_shape, num_classes)
         model.compile(**compile_args)
 
         batch_size=fit_args.pop('batch_size')

@@ -5,7 +5,9 @@ when they are. The point of this repository (at time of writing) isn't to get
 networks exactly right - it's to train on multiple GPUs, regardless of network.
 """
 
+import tensorflow as tf
 from keras.layers import Conv2D, Dense, Flatten, Input, MaxPooling2D
+from keras.models import Model
 
 
 class VGG16():
@@ -53,6 +55,8 @@ class VGG16():
         """Build the network
 
         :param input_shape: tuple holding the shape of the input
+        :param num_classes: int for the number of classes in the output
+        :return: keras Model object
         """
 
         inputs = Input(shape=input_shape)
@@ -75,4 +79,5 @@ class VGG16():
         layer = Dense(units=2048, activation='relu')(layer)
         outputs = Dense(units=num_classes, activation='softmax')(layer)
 
-        return inputs, outputs
+        model = Model(inputs=inputs, outputs=outputs)
+        return model
