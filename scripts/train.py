@@ -45,7 +45,7 @@ def parse_args():
               '\'dataset\' section.')
     )
     parser.add_argument(
-        '--gpu_id', type=int,
+        '--gpu_ids', type=int, nargs='+',
         help='GPU ID for the GPU to train the model on.'
     )
     parser.add_argument(
@@ -83,7 +83,7 @@ def main():
     trainer.train(
         network, dataset_iterator,
         compile_args, fit_args, 
-        args.gpu_id
+        args.gpu_ids
     )
 
 
