@@ -4,6 +4,7 @@ import os
 import tensorflow as tf
 from keras.layers import Concatenate, Lambda
 from keras.models import Model
+from model import MultiGPUModel
 
 
 class KerasTrainer():
@@ -78,51 +79,9 @@ class KerasTrainer():
         else:
             with tf.device(':/cpu:0'):
                 model = network.build(input_shape, num_classes)
-            model = self.parallelize_model(model, gpu_ids, batch_size)
+            model = MultiGPUModel(model, gpu_ids, batch_size)
 
         return model
-
-    @staticmethod
-    def parallelize_model(model, gpu_ids, batch_size):
-        """Parallelize the model over the given gpu_ids
-
-        Note: This is largely copied from:
-
-        https://github.com/kuza55/keras-extras/blob/master/utils/multi_gpu.py
-
-        :param model: Keras Model instance
-        :param gpu_ids: list of integers to run the model on
-        :param batch_size: int holding the batch size to use during training;
-         if multiple gpus are passed in, one batch with batch_size will be run
-         on each gpu
-        """
-
-        all_sliced_outputs = []
-        for gpu_id in gpu_ids:
-            with tf.device('/gpu:{}'.format(gpu_id)):
-
-                sliced_inputs = []
-                for model_input in model.inputs:
-                    idx_min = gpu_id * batch_size
-                    idx_max = (gpu_id + 1) * batch_size
-                    input_slice = Lambda(
-                        lambda x: x[idx_min:idx_max],
-                        lambda shape: shape
-                    )(model_input)
-                    sliced_inputs.append(input_slice)
-
-                sliced_outputs = model(sliced_inputs)
-                if len(sliced_outputs.get_shape()) != 2:
-                    msg = 'Only outputs with shape 2 supported right now!'
-                    raise ValueError(msg)
-
-                all_sliced_outputs.append(sliced_outputs)
-
-        with tf.device('/cpu:0'):
-            outputs = Concatenate(axis=0)(all_sliced_outputs)
-
-            parallelized_model = Model(inputs=model.inputs, outputs=outputs)
-            return parallelized_model
 
     def train(self, network, dataset_iterator, compile_args, fit_args,
               gpu_ids):
