@@ -1,9 +1,12 @@
 """Model training class"""
 
 import os
+
 import tensorflow as tf
+from keras.callbacks import CSVLogger, EarlyStopping, ModelCheckpoint
 from keras.layers import Concatenate, Lambda
 from keras.models import Model
+
 from model import MultiGPUModel
 
 
@@ -26,6 +29,26 @@ class KerasTrainer():
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
+    def _get_callbacks(self):
+        """Return callbacks to pass into the Model.fit method
+
+        Note: This simply returns statically instantiated callbacks. In the
+        future it could be altered to allow for callbacks that are specified
+        and configured via a training config.
+        """
+
+        fpath_history = os.path.join(self.output_dir, 'history.csv')
+        fpath_weights = os.path.join(self.output_dir, 'weights.h5')
+
+        csv_logger = CSVLogger(filename=fpath_history)
+        model_checkpoint = ModelCheckpoint(
+            filepath=fpath_weights, verbose=True
+        )
+        early_stopping = EarlyStopping(patience=5, verbose=True)
+
+        callbacks = [csv_logger, model_checkpoint, early_stopping]
+        return callbacks
+
     @staticmethod
     def _set_cuda_devices(gpu_ids):
         """Set CUDA related environment variables before running models
@@ -39,19 +62,15 @@ class KerasTrainer():
         os.environ['CUDA_VISIBLE_DEVICES'] = ','.join(gpu_ids)
 
     def _save_model(self, model):
-        """Save the model to a YML and weights file
+        """Save the model to a YML file
 
         :param model: Keras Model object
         """
 
         fpath_model_yml = os.path.join(self.output_dir, 'model.yml')
-        fpath_weights = os.path.join(self.output_dir, 'weights.h5')
-
         yaml_str = model.to_yaml()
         with open(fpath_model_yml, 'w') as f:
             f.write(yaml_str)
-
-        model.save_weights(fpath_weights)
 
     def build_model(self, network, input_shape, num_classes,
                     gpu_ids, batch_size):
@@ -123,11 +142,13 @@ class KerasTrainer():
             dataset_iterator.x_test.shape[0] // batch_size, 1
         )
 
+        callbacks = self._get_callbacks()
         model.fit_generator(
             generator=train_iter,
             steps_per_epoch=steps_per_epoch,
             validation_data=test_iter,
             validation_steps=validation_steps,
+            callbacks=callbacks,
             **fit_args
         )
 
