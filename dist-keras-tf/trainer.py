@@ -3,7 +3,7 @@
 import os
 
 import tensorflow as tf
-from keras.callbacks import CSVLogger, EarlyStopping, ModelCheckpoint
+from keras.callbacks import CSVLogger, ModelCheckpoint
 from keras.layers import Concatenate, Lambda
 from keras.models import Model
 
@@ -41,9 +41,8 @@ class KerasTrainer():
         model_checkpoint = ModelCheckpoint(
             filepath=fpath_weights, verbose=True
         )
-        early_stopping = EarlyStopping(patience=5, verbose=True)
+        callbacks = [csv_logger, model_checkpoint]
 
-        callbacks = [csv_logger, model_checkpoint, early_stopping]
         return callbacks
 
     @staticmethod
