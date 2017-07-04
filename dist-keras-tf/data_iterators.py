@@ -86,18 +86,20 @@ class DataSetIterator():
         while True:
             idx_max = idx_min + batch_size
 
-            x_train = self.x_train[idx_min:idx_max]
-            y_train = self.y_train[idx_min:idx_max]
+            if idx_max > nb_train_samples:
+                idx_min = 0
+                idx_max = idx_min + batch_size
 
-            idx_min += batch_size
-            if idx_min >= nb_train_samples:
                 idx_shuffle = (
                     np.random.RandomState(529).permutation(nb_train_samples)
                 )
 
                 self.x_train = self.x_train[idx_shuffle]
                 self.y_train = self.y_train[idx_shuffle]
-                idx_min = 0
+
+            x_train = self.x_train[idx_min:idx_max]
+            y_train = self.y_train[idx_min:idx_max]
+            idx_min += batch_size
 
             yield x_train, y_train
 
@@ -115,11 +117,12 @@ class DataSetIterator():
         while True:
             idx_max = idx_min + batch_size
 
+            if idx_max > len(self.x_test):
+                idx_min = 0
+                idx_max = idx_min + batch_size
+
             x_test = self.x_test[idx_min:idx_max]
             y_test = self.y_test[idx_min:idx_max]
-
             idx_min += batch_size
-            if idx_min >= len(self.x_test):
-                idx_min = 0
 
             yield x_test, y_test
