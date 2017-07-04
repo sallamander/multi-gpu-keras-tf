@@ -26,9 +26,6 @@ class KerasTrainer():
 
         self.output_dir = output_dir
 
-        if not os.path.exists(output_dir):
-            os.makedirs(output_dir)
-
     def _get_callbacks(self):
         """Return callbacks to pass into the Model.fit method
 

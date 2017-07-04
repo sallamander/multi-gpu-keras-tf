@@ -71,7 +71,7 @@ class DataSetIterator():
         assert self.y_train[0].shape == self.y_test[0].shape
         return self.y_train[0].shape
 
-    def get_train_iter(self, batch_size):
+    def get_train_iter(self, batch_size=32):
         """Return a generator that yields batches of training data indefinitely
 
         :param batch_size: int for the number of training examples to return
@@ -103,7 +103,7 @@ class DataSetIterator():
 
             yield x_train, y_train
 
-    def get_test_iter(self, batch_size):
+    def get_test_iter(self, batch_size=32):
         """Return a generator that yields batches of test data indefinitely
 
         :param batch_size: int for the number of training examples to return

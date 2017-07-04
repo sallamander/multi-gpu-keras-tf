@@ -1,11 +1,28 @@
 #!/usr/bin/env python
 
 import argparse
+import os
 import yaml
 
 from data_iterators import DataSetIterator
 from networks import VGG16
 from trainer import KerasTrainer
+
+
+def save_config(config, output_dir):
+    """Save the config into the output_dir
+
+    :param config: dct containing specs to use for training
+    :param output_dir: str holding the output directory to save the
+    ig to
+    """
+
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+
+    fpath_config = os.path.join(output_dir, 'config.yml')
+    with open(fpath_config, 'w') as f:
+        yaml.dump(config, f, default_flow_style=False)
 
 
 def validate_config(config):
@@ -62,10 +79,12 @@ def main():
 
     args = parse_args()
     fpath_config = args.config
+    output_dir = args.output_dir
 
     with open(fpath_config, 'r') as f:
         config = yaml.load(f)
     validate_config(config)
+    save_config(config, output_dir)
 
     dataset_name = config['dataset']['name']
     dataset_iterator = DataSetIterator(name=dataset_name)
@@ -79,7 +98,7 @@ def main():
     # NOTE: This is the only network supported right now, but in the future
     # it might be configurable via the config
     network = VGG16()
-    trainer = KerasTrainer(output_dir=args.output_dir)
+    trainer = KerasTrainer(output_dir=output_dir)
     trainer.train(
         network, dataset_iterator,
         compile_args, fit_args, 
