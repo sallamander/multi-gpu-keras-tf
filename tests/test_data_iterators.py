@@ -43,7 +43,7 @@ class TestDataSetIterator():
 
                 img_size = (28, 28) if name == 'mnist' else (32, 32)
                 expected_input_shape = (
-                    (nb_obs, *img_size) if name == 'mnist' else
+                    (nb_obs, *img_size, 1) if name == 'mnist' else
                     (nb_obs, *img_size, 3)
                 )
                 expected_output_shape = (nb_obs, self.nb_classes_dict[name])

@@ -19,7 +19,7 @@ class TestVGG16():
         for _, dataset_specs in datasets.items():
             vgg16 = VGG16()
 
-            inputs, outputs = vgg16.build(
+            model = vgg16.build(
                 input_shape=dataset_specs['input_shape'],
                 num_classes=dataset_specs['num_classes']
             )
